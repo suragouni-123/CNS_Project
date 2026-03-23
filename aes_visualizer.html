@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES Encryption Process Visualizer</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="visualizer_style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-eye"></i>
+                <h1>Cryptex Visualizer</h1>
+            </div>
+            <p class="subtitle">Watch Real-time Encryption & Decryption Step-by-Step</p>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-lock"></i> Encrypt
+                </a>
+                <a href="#" class="nav-link active" data-page="visualizer">
+                    <i class="fas fa-eye"></i> Visualizer
+                </a>
+                <a href="security_audit.html" class="nav-link" data-page="audit">
+                    <i class="fas fa-clipboard-check"></i> Security Audit
+                </a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Control Panel -->
+            <section class="control-section">
+                <div class="control-panel">
+                    <div class="input-group">
+                        <label for="inputText">
+                            <i class="fas fa-keyboard"></i>
+                            Input Text:
+                        </label>
+                        <textarea id="inputText" placeholder="Enter text to encrypt...">Hello, World!</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i>
+                            Password:
+                        </label>
+                        <input type="password" id="password" placeholder="Enter encryption password..." value="mypassword123">
+                    </div>
+                    <div class="button-group">
+                        <button id="encryptBtn" class="btn-primary">
+                            <i class="fas fa-lock"></i>
+                            Start Encryption
+                        </button>
+                        <button id="decryptBtn" class="btn-secondary">
+                            <i class="fas fa-unlock"></i>
+                            Start Decryption
+                        </button>
+                        <button id="resetBtn" class="btn-danger">
+                            <i class="fas fa-redo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Process Steps -->
+            <section class="process-section">
+                <div class="process-container">
+                    <h3>
+                        <i class="fas fa-cogs"></i>
+                        Encryption Process Steps
+                    </h3>
+                    <div class="steps-timeline">
+                        <div class="step" id="step1">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Input Processing</h4>
+                                <p>Convert text to bytes</p>
+                                <div class="step-result" id="step1Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="step2">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Salt Generation</h4>
+                                <p>Generate random 16-byte salt</p>
+                                <div class="step-result" id="step2Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="step3">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Key Derivation (PBKDF2)</h4>
+                                <p>100,000 iterations to derive AES-256 key</p>
+                                <div class="step-result" id="step3Result"></div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="pbkdf2Progress"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" id="step4">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>IV Generation</h4>
+                                <p>Generate 12-byte initialization vector</p>
+                                <div class="step-result" id="step4Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="step5">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h4>AES-256-GCM Encryption</h4>
+                                <p>Encrypt data with derived key</p>
+                                <div class="step-result" id="step5Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="step6">
+                            <div class="step-number">6</div>
+                            <div class="step-content">
+                                <h4>File Assembly</h4>
+                                <p>Combine: Signature + Version + Salt + IV + Encrypted Data</p>
+                                <div class="step-result" id="step6Result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualization Panel -->
+            <section class="visualization-section">
+                <div class="viz-container">
+                    <h3>
+                        <i class="fas fa-chart-bar"></i>
+                        Real-time Data Visualization
+                    </h3>
+                    <div class="viz-grid">
+                        <div class="viz-card">
+                            <h4>Binary Representation</h4>
+                            <div class="binary-display" id="binaryDisplay"></div>
+                        </div>
+                        <div class="viz-card">
+                            <h4>Hexadecimal Display</h4>
+                            <div class="hex-display" id="hexDisplay"></div>
+                        </div>
+                        <div class="viz-card">
+                            <h4>Byte Animation</h4>
+                            <div class="byte-animation" id="byteAnimation"></div>
+                        </div>
+                        <div class="viz-card">
+                            <h4>Process Flow</h4>
+                            <canvas id="processFlow" width="300" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Decryption Process -->
+            <section class="decryption-section" id="decryptionSection" style="display: none;">
+                <div class="process-container">
+                    <h3>
+                        <i class="fas fa-unlock"></i>
+                        Decryption Process Steps
+                    </h3>
+                    <div class="steps-timeline">
+                        <div class="step" id="decryptStep1">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>File Validation</h4>
+                                <p>Check signature and version</p>
+                                <div class="step-result" id="decryptStep1Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="decryptStep2">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Component Extraction</h4>
+                                <p>Extract salt, IV, and encrypted data</p>
+                                <div class="step-result" id="decryptStep2Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="decryptStep3">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Key Derivation</h4>
+                                <p>Recreate key using extracted salt</p>
+                                <div class="step-result" id="decryptStep3Result"></div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="decryptPbkdf2Progress"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" id="decryptStep4">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>AES-256-GCM Decryption</h4>
+                                <p>Decrypt and verify integrity</p>
+                                <div class="step-result" id="decryptStep4Result"></div>
+                            </div>
+                        </div>
+                        <div class="step" id="decryptStep5">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h4>Result Verification</h4>
+                                <p>Display original data</p>
+                                <div class="step-result" id="decryptStep5Result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Final Results -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-container">
+                    <h3>
+                        <i class="fas fa-check-circle"></i>
+                        Final Results
+                    </h3>
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4>Original Data</h4>
+                            <div class="result-content" id="originalResult"></div>
+                        </div>
+                        <div class="result-card">
+                            <h4>Encrypted Data</h4>
+                            <div class="result-content" id="encryptedResult"></div>
+                        </div>
+                        <div class="result-card">
+                            <h4>Decrypted Data</h4>
+                            <div class="result-content" id="decryptedResult"></div>
+                        </div>
+                        <div class="result-card">
+                            <h4>Verification</h4>
+                            <div class="result-content" id="verificationResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 AES Process Visualizer | Educational Encryption Tool</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-info-circle"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="visualizer_script.js"></script>
+</body>
+</html>

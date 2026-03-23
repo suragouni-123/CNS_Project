@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Log Dashboard</title>
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="audit_style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Cryptex Security Audit</h1>
+            </div>
+            <p class="subtitle">Monitor All Encryption & Decryption Activities</p>
+            <nav class="main-nav">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-lock"></i> Encrypt
+                </a>
+                <a href="aes_visualizer.html" class="nav-link" data-page="visualizer">
+                    <i class="fas fa-eye"></i> Visualizer
+                </a>
+                <a href="#" class="nav-link active" data-page="audit">
+                    <i class="fas fa-clipboard-check"></i> Security Audit
+                </a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Stats Overview -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalEncryptions">0</h3>
+                            <p>Total Encryptions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-unlock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalDecryptions">0</h3>
+                            <p>Total Decryptions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="failedAttempts">0</h3>
+                            <p>Failed Attempts</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="uniqueUsers">0</h3>
+                            <p>Unique Users</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="control-section">
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label for="userSelect">
+                            <i class="fas fa-user"></i>
+                            User ID:
+                        </label>
+                        <input type="text" id="userSelect" placeholder="Enter your user ID" value="user_001">
+                    </div>
+                    <div class="control-group">
+                        <label for="logFilter">
+                            <i class="fas fa-filter"></i>
+                            Filter:
+                        </label>
+                        <select id="logFilter">
+                            <option value="all">All Activities</option>
+                            <option value="encryption">Encryption Only</option>
+                            <option value="decryption">Decryption Only</option>
+                            <option value="failed">Failed Attempts</option>
+                            <option value="success">Success Only</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <button id="clearLogs" class="btn-danger">
+                            <i class="fas fa-trash"></i>
+                            Clear Logs
+                        </button>
+                        <button id="refreshLogs" class="btn-success">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button id="exportLogs" class="btn-primary">
+                            <i class="fas fa-download"></i>
+                            Export Logs
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Activity Monitor -->
+            <section class="live-section">
+                <div class="live-monitor">
+                    <h3>
+                        <i class="fas fa-circle text-success live-indicator"></i>
+                        Security Analysis Monitor
+                    </h3>
+                    <div class="live-content">
+                        <div id="liveActivity" class="live-activity">
+                            <div class="no-activity">
+                                <i class="fas fa-info-circle"></i> 
+                                No files selected for analysis. Go to main app and select files to see security analysis results here.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Audit Log Table -->
+            <section class="log-section">
+                <div class="log-container">
+                    <div class="log-header">
+                        <h3>
+                            <i class="fas fa-history"></i>
+                            Detailed Audit Log
+                        </h3>
+                        <div class="log-controls">
+                            <input type="text" id="searchLogs" placeholder="Search logs...">
+                            <select id="timeFilter">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="log-table-container">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User ID</th>
+                                    <th>Action</th>
+                                    <th>File Name</th>
+                                    <th>File Size</th>
+                                    <th>Status</th>
+                                    <th>IP Address</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody">
+                                <!-- Logs will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Analytics -->
+            <section class="analytics-section">
+                <div class="analytics-container">
+                    <h3>
+                        <i class="fas fa-chart-line"></i>
+                        Security Analytics
+                    </h3>
+                    <div class="analytics-grid">
+                        <div class="chart-container">
+                            <h4>Activity Timeline</h4>
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Success Rate</h4>
+                            <canvas id="successChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>File Types Processed</h4>
+                            <canvas id="fileTypeChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Hourly Activity</h4>
+                            <canvas id="hourlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Security Audit System | Real-time Monitoring</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-info-circle"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="audit_script.js"></script>
+</body>
+</html>
