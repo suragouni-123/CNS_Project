@@ -369,9 +369,18 @@ function setupEventListeners() {
     
     // Drag and drop events
     if (dropZone) {
-        dropZone.addEventListener('dragover', handleDragOver);
-        dropZone.addEventListener('dragleave', handleDragLeave);
-        dropZone.addEventListener('drop', handleDrop);
+        dropZone.addEventListener('dragover', (e) => {
+            e.stopPropagation();
+            handleDragOver(e);
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.stopPropagation();
+            handleDragLeave(e);
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.stopPropagation();
+            handleDrop(e);
+        });
     }
 
     // Password events
@@ -405,10 +414,13 @@ function handleDragLeave(e) {
 
 function handleDrop(e) {
     e.preventDefault();
+    e.stopPropagation();
     dropZone.classList.remove('dragover');
     
-    const files = Array.from(e.dataTransfer.files);
-    addFiles(files);
+    if (e.dataTransfer && e.dataTransfer.files) {
+        const files = Array.from(e.dataTransfer.files);
+        addFiles(files);
+    }
 }
 
 function addFiles(files) {
