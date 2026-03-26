@@ -4,7 +4,7 @@ class AESCrypto {
         this.algorithm = 'AES-GCM';
         this.keyLength = 256;
         this.fileSignature = 'AES256'; // 6 bytes signature
-        this.version = 1; // 1 byte version
+        this.version = 2; // 1 byte version
     }
 
     // Derive key from password using PBKDF2
@@ -33,7 +33,7 @@ class AESCrypto {
     }
 
     // Encrypt file data with proper format
-    async encrypt(data, password) {
+    async encrypt(data, password, mimeType = '') {
         try {
             console.log('Starting encryption...');
             
@@ -59,15 +59,19 @@ class AESCrypto {
             
             console.log('Encrypted data length:', encryptedData.byteLength);
             
-            // Create file format: [6 bytes signature][1 byte version][16 bytes salt][12 bytes IV][encrypted data]
+            // Create file format: [6 bytes signature][1 byte version][16 bytes salt][12 bytes IV][1 byte mime length][X bytes mime type][encrypted data]
             const signature = new TextEncoder().encode(this.fileSignature);
             const versionBytes = new Uint8Array([this.version]);
+            const mimeBytes = new TextEncoder().encode(mimeType);
+            const mimeLenBytes = new Uint8Array([mimeBytes.length]);
             
             const combined = new Uint8Array(
                 signature.length + 
                 versionBytes.length + 
                 salt.length + 
                 iv.length + 
+                mimeLenBytes.length +
+                mimeBytes.length +
                 encryptedData.byteLength
             );
             
@@ -83,6 +87,12 @@ class AESCrypto {
             
             combined.set(iv, offset);
             offset += iv.length;
+            
+            combined.set(mimeLenBytes, offset);
+            offset += mimeLenBytes.length;
+            
+            combined.set(mimeBytes, offset);
+            offset += mimeBytes.length;
             
             combined.set(new Uint8Array(encryptedData), offset);
             
@@ -110,7 +120,7 @@ class AESCrypto {
         
         // Check version
         const version = encryptedData[6];
-        if (version !== this.version) {
+        if (version !== 1 && version !== 2) {
             throw new Error(`Unsupported encrypted file version: ${version}`);
         }
         
@@ -126,10 +136,22 @@ class AESCrypto {
             // Validate format
             this.validateEncryptedFormat(encryptedData);
             
-            // Extract components
-            const salt = encryptedData.slice(7, 23); // After signature (6) + version (1)
-            const iv = encryptedData.slice(23, 35);  // After salt (16 bytes)
-            const data = encryptedData.slice(35);    // After IV (12 bytes)
+            // Extract components based on version
+            const version = encryptedData[6];
+            let salt, iv, data, mimeType = '';
+            
+            if (version === 1) {
+                salt = encryptedData.slice(7, 23); // After signature (6) + version (1)
+                iv = encryptedData.slice(23, 35);  // After salt (16 bytes)
+                data = encryptedData.slice(35);    // After IV (12 bytes)
+            } else if (version === 2) {
+                salt = encryptedData.slice(7, 23);
+                iv = encryptedData.slice(23, 35);
+                const mimeLen = encryptedData[35];
+                const mimeBytes = encryptedData.slice(36, 36 + mimeLen);
+                mimeType = new TextDecoder().decode(mimeBytes);
+                data = encryptedData.slice(36 + mimeLen);
+            }
             
             console.log('Extracted salt length:', salt.length);
             console.log('Extracted IV length:', iv.length);
@@ -151,7 +173,10 @@ class AESCrypto {
             console.log('Decryption successful!');
             console.log('Decrypted data length:', decryptedData.byteLength);
             
-            return new Uint8Array(decryptedData);
+            return {
+                data: new Uint8Array(decryptedData),
+                mimeType: mimeType
+            };
         } catch (error) {
             console.error('Decryption error:', error);
             if (error.message.includes('Invalid encrypted file format')) {
@@ -174,6 +199,40 @@ let selectedFiles = [];
 let currentMode = 'encrypt';
 let isProcessing = false;
 const aesCrypto = new AESCrypto();
+
+// localStorage helpers for cross-tab linked workflow
+function saveSharedState(password, mode, files, operation, payloadBase64) {
+    try {
+        localStorage.setItem('sharedPassword', password);
+        localStorage.setItem('sharedMode', mode);
+        localStorage.setItem('sharedFiles', JSON.stringify(files.map(f => ({
+            name: f.name,
+            size: f.size,
+            type: f.type || 'unknown'
+        }))));
+
+        if (operation) {
+            localStorage.setItem('sharedOperation', JSON.stringify(operation));
+        }
+
+        if (payloadBase64) {
+            const maxLen = 2 * 1024 * 1024;
+            const trimmed = payloadBase64.length > maxLen ? payloadBase64.slice(0, maxLen) : payloadBase64;
+            localStorage.setItem('sharedPayload', trimmed);
+        }
+    } catch (e) {
+        console.warn('saveSharedState failed', e);
+    }
+}
+
+function bytesToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
 
 // DOM elements
 const dropZone = document.getElementById('dropZone');
@@ -217,13 +276,14 @@ function setupNavigationButtons() {
                 return;
             }
             
-            // Store data in sessionStorage for other pages
-            sessionStorage.setItem('sharedPassword', password);
-            sessionStorage.setItem('sharedFiles', JSON.stringify(files.map(f => ({
+            // Store data in localStorage for other pages
+            localStorage.setItem('sharedPassword', password);
+            localStorage.setItem('sharedFiles', JSON.stringify(files.map(f => ({
                 name: f.name,
                 size: f.size,
                 type: f.type
             }))));
+            localStorage.setItem('sharedMode', currentMode);
             
             // Navigate to visualizer
             window.location.href = 'aes_visualizer.html';
@@ -245,9 +305,9 @@ function setupNavigationButtons() {
                 return;
             }
             
-            // Store data in sessionStorage for other pages
-            sessionStorage.setItem('sharedPassword', password);
-            sessionStorage.setItem('sharedFiles', JSON.stringify(files.map(f => ({
+            // Store data in localStorage for other pages
+            localStorage.setItem('sharedPassword', password);
+            localStorage.setItem('sharedFiles', JSON.stringify(files.map(f => ({
                 name: f.name,
                 size: f.size,
                 type: f.type
@@ -367,6 +427,13 @@ function addFiles(files) {
     updateFileList();
     updateProcessButton();
     
+    // Update shared state for other tabs (Security Audit real-time analysis)
+    localStorage.setItem('sharedFiles', JSON.stringify(selectedFiles.map(f => ({
+        name: f.name,
+        size: f.file.size,
+        type: f.file.type || 'unknown'
+    }))));
+    
     // Update message when files are added
     if (selectedFiles.length === 1) {
         updateMessage(`Great! You've selected "${selectedFiles[0].name}". Now enter a password to secure it.`, 'info');
@@ -411,6 +478,13 @@ function removeFile(fileId) {
     selectedFiles = selectedFiles.filter(f => f.id != fileId);
     updateFileList();
     updateProcessButton();
+    
+    // Update shared state
+    localStorage.setItem('sharedFiles', JSON.stringify(selectedFiles.map(f => ({
+        name: f.name,
+        size: f.file.size,
+        type: f.file.type || 'unknown'
+    }))));
 }
 
 function clearFiles() {
@@ -422,6 +496,9 @@ function clearFiles() {
     
     // Reset message when files are cleared
     updateMessage('Ready to secure your files with military-grade encryption. Select files and enter a password to begin.', 'info');
+    
+    // Update shared state
+    localStorage.removeItem('sharedFiles');
 }
 
 // Password functions
@@ -499,7 +576,14 @@ function updateProcessButton() {
     if (!processBtn) return;
     
     const hasFiles = selectedFiles.length > 0;
-    const hasPassword = passwordInput.value.length > 0;
+    let hasPassword = passwordInput.value.length > 0;
+    
+    // Password strength guardrails for encryption
+    if (currentMode === 'encrypt' && hasPassword) {
+        if (strengthText.classList.contains('weak') || strengthBar.classList.contains('weak')) {
+            hasPassword = false;
+        }
+    }
     
     processBtn.disabled = !hasFiles || !hasPassword || isProcessing;
     
@@ -551,10 +635,11 @@ async function processFiles() {
                 
                 let processedData;
                 let extension;
+                let fileMimeType = 'application/octet-stream';
                 
                 if (currentMode === 'encrypt') {
                     // Encrypt file
-                    processedData = await aesCrypto.encrypt(fileData, password);
+                    processedData = await aesCrypto.encrypt(fileData, password, file.type);
                     extension = '.aes256';
                 } else {
                     // Check if file is properly encrypted
@@ -564,18 +649,27 @@ async function processFiles() {
                     }
                     
                     // Decrypt file
-                    processedData = await aesCrypto.decrypt(dataView, password);
-                    extension = '.decrypted';
+                    const result = await aesCrypto.decrypt(dataView, password);
+                    processedData = result.data;
+                    if (result.mimeType) {
+                        fileMimeType = result.mimeType;
+                    }
+                    
+                    // Extract original file extension from encrypted file metadata
+                    const originalName = file.name.replace('.aes256', '');
+                    extension = ''; // Remove extension to restore original file
                 }
                 
-                // Create download link
-                const blob = new Blob([processedData], { type: 'application/octet-stream' });
+                // Create download link with proper MIME type
+                let mimeType = currentMode === 'decrypt' ? fileMimeType : 'application/octet-stream';
+                
+                const blob = new Blob([processedData], { type: mimeType });
                 const url = URL.createObjectURL(blob);
                 
                 const originalName = currentMode === 'encrypt' ? file.name : file.name.replace('.aes256', '');
                 const processedName = currentMode === 'encrypt' ? 
                     file.name + extension : 
-                    originalName + extension;
+                    originalName;
                 
                 results.push({
                     originalName: file.name,
@@ -598,11 +692,47 @@ async function processFiles() {
         // Complete progress
         updateProgress(100, 'Complete!');
         
-        // Show results
-        setTimeout(() => {
-            hideProgress();
-            showResults(results);
-        }, 500);
+        // Show results and store shared state for visualizer and audit
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        hideProgress();
+
+        const firstSuccess = results.find(result => result.success);
+        let payload = null;
+
+        if (selectedFiles.length > 0 && firstSuccess) {
+            try {
+                const firstFile = selectedFiles[0].file;
+                const firstFileData = await firstFile.arrayBuffer();
+                const firstProcessed = firstSuccess.processedSize ? await fetch(firstSuccess.url).then(r => r.arrayBuffer()) : null;
+
+                if (firstProcessed) {
+                    payload = JSON.stringify({
+                        originalBase64: bytesToBase64(firstFileData),
+                        processedBase64: bytesToBase64(firstProcessed),
+                        fileName: firstSuccess.originalName,
+                        mode: currentMode
+                    });
+                }
+            } catch (e) {
+                console.warn('Unable to capture payload for shared state', e);
+            }
+        }
+
+        saveSharedState(
+            password,
+            currentMode,
+            selectedFiles,
+            {
+                action: currentMode,
+                fileName: firstSuccess ? firstSuccess.originalName : '',
+                status: firstSuccess ? 'success' : 'failed',
+                timestamp: new Date().toISOString()
+            },
+            payload
+        );
+
+        showResults(results);
         
     } catch (error) {
         hideProgress();

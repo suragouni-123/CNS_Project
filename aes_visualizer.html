@@ -30,8 +30,21 @@
         </header>
 
         <main class="main-content">
-            <!-- Control Panel -->
-            <section class="control-section">
+            <!-- Input Section (hidden on auto sequence) -->
+            <section class="input-section" style="display: none;" id="passwordSection">
+                <div class="input-container">
+                    <div class="input-group">
+                        <label for="password">
+                            <i class="fas fa-key"></i>
+                            Password (from main tab)
+                        </label>
+                        <input type="password" id="password" placeholder="Enter password from main application">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel (hidden on auto sequence) -->
+            <section class="control-section" style="display: none;" id="inputTextSection">
                 <div class="control-panel">
                     <div class="input-group">
                         <label for="inputText">
@@ -39,13 +52,6 @@
                             Input Text:
                         </label>
                         <textarea id="inputText" placeholder="Enter text to encrypt...">Hello, World!</textarea>
-                    </div>
-                    <div class="input-group">
-                        <label for="password">
-                            <i class="fas fa-lock"></i>
-                            Password:
-                        </label>
-                        <input type="password" id="password" placeholder="Enter encryption password..." value="mypassword123">
                     </div>
                     <div class="button-group">
                         <button id="encryptBtn" class="btn-primary">
@@ -67,60 +73,131 @@
             <!-- Process Steps -->
             <section class="process-section">
                 <div class="process-container">
-                    <h3>
-                        <i class="fas fa-cogs"></i>
-                        Encryption Process Steps
-                    </h3>
-                    <div class="steps-timeline">
-                        <div class="step" id="step1">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h4>Input Processing</h4>
-                                <p>Convert text to bytes</p>
-                                <div class="step-result" id="step1Result"></div>
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button class="tab-btn active" id="encryptionTab">
+                            <i class="fas fa-lock"></i>
+                            Encryption Process
+                        </button>
+                        <button class="tab-btn" id="decryptionTab">
+                            <i class="fas fa-unlock"></i>
+                            Decryption Process
+                        </button>
+                    </div>
+
+                    <!-- Encryption Process -->
+                    <div id="encryptionProcess" class="process-content active">
+                        <h3>
+                            <i class="fas fa-cogs"></i>
+                            Encryption Process Steps
+                        </h3>
+                        <div class="steps-timeline">
+                            <div class="step" id="step1">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Input Processing</h4>
+                                    <p>Convert text to bytes</p>
+                                    <div class="step-result" id="step1Result"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="step" id="step2">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h4>Salt Generation</h4>
-                                <p>Generate random 16-byte salt</p>
-                                <div class="step-result" id="step2Result"></div>
+                            <div class="step" id="step2">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Salt Generation</h4>
+                                    <p>Generate random 16-byte salt</p>
+                                    <div class="step-result" id="step2Result"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="step" id="step3">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h4>Key Derivation (PBKDF2)</h4>
-                                <p>100,000 iterations to derive AES-256 key</p>
-                                <div class="step-result" id="step3Result"></div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="pbkdf2Progress"></div>
+                            <div class="step" id="step3">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Key Derivation (PBKDF2)</h4>
+                                    <p>100,000 iterations to derive AES-256 key</p>
+                                    <div class="step-result" id="step3Result"></div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="pbkdf2Progress"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="step" id="step4">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>IV Generation</h4>
+                                    <p>Generate 12-byte initialization vector</p>
+                                    <div class="step-result" id="step4Result"></div>
+                                </div>
+                            </div>
+                            <div class="step" id="step5">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h4>AES-256-GCM Encryption</h4>
+                                    <p>Encrypt data with derived key</p>
+                                    <div class="step-result" id="step5Result"></div>
+                                </div>
+                            </div>
+                            <div class="step" id="step6">
+                                <div class="step-number">6</div>
+                                <div class="step-content">
+                                    <h4>File Assembly</h4>
+                                    <p>Combine: Signature + Version + Salt + IV + Encrypted Data</p>
+                                    <div class="step-result" id="step6Result"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="step" id="step4">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h4>IV Generation</h4>
-                                <p>Generate 12-byte initialization vector</p>
-                                <div class="step-result" id="step4Result"></div>
+                    </div>
+
+                    <!-- Decryption Process -->
+                    <div id="decryptionProcess" class="process-content">
+                        <h3>
+                            <i class="fas fa-unlock"></i>
+                            Decryption Process Steps
+                        </h3>
+
+                        <!-- The automated visualizer pulls from storage automatically via the Visualize Process button -->
+
+                        <div class="steps-timeline">
+                            <div class="step" id="decryptStep1">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>File Validation</h4>
+                                    <p>Check signature and version</p>
+                                    <div class="step-result" id="decryptStep1Result"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="step" id="step5">
-                            <div class="step-number">5</div>
-                            <div class="step-content">
-                                <h4>AES-256-GCM Encryption</h4>
-                                <p>Encrypt data with derived key</p>
-                                <div class="step-result" id="step5Result"></div>
+                            <div class="step" id="decryptStep2">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Component Extraction</h4>
+                                    <p>Extract salt, IV, and encrypted data</p>
+                                    <div class="step-result" id="decryptStep2Result"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="step" id="step6">
-                            <div class="step-number">6</div>
-                            <div class="step-content">
-                                <h4>File Assembly</h4>
-                                <p>Combine: Signature + Version + Salt + IV + Encrypted Data</p>
-                                <div class="step-result" id="step6Result"></div>
+                            <div class="step" id="decryptStep3">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Key Derivation</h4>
+                                    <p>Recreate key using extracted salt</p>
+                                    <div class="step-result" id="decryptStep3Result"></div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="decryptPbkdf2Progress"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="step" id="decryptStep4">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>AES-256-GCM Decryption</h4>
+                                    <p>Decrypt and verify integrity</p>
+                                    <div class="step-result" id="decryptStep4Result"></div>
+                                </div>
+                            </div>
+                            <div class="step" id="decryptStep5">
+                                <div class="step-number">5</div>
+                                <div class="step-content">
+                                    <h4>Result Verification</h4>
+                                    <p>Display original data</p>
+                                    <div class="step-result" id="decryptStep5Result"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,60 +232,7 @@
                 </div>
             </section>
 
-            <!-- Decryption Process -->
-            <section class="decryption-section" id="decryptionSection" style="display: none;">
-                <div class="process-container">
-                    <h3>
-                        <i class="fas fa-unlock"></i>
-                        Decryption Process Steps
-                    </h3>
-                    <div class="steps-timeline">
-                        <div class="step" id="decryptStep1">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h4>File Validation</h4>
-                                <p>Check signature and version</p>
-                                <div class="step-result" id="decryptStep1Result"></div>
-                            </div>
-                        </div>
-                        <div class="step" id="decryptStep2">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h4>Component Extraction</h4>
-                                <p>Extract salt, IV, and encrypted data</p>
-                                <div class="step-result" id="decryptStep2Result"></div>
-                            </div>
-                        </div>
-                        <div class="step" id="decryptStep3">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h4>Key Derivation</h4>
-                                <p>Recreate key using extracted salt</p>
-                                <div class="step-result" id="decryptStep3Result"></div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="decryptPbkdf2Progress"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="step" id="decryptStep4">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h4>AES-256-GCM Decryption</h4>
-                                <p>Decrypt and verify integrity</p>
-                                <div class="step-result" id="decryptStep4Result"></div>
-                            </div>
-                        </div>
-                        <div class="step" id="decryptStep5">
-                            <div class="step-number">5</div>
-                            <div class="step-content">
-                                <h4>Result Verification</h4>
-                                <p>Display original data</p>
-                                <div class="step-result" id="decryptStep5Result"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
 
             <!-- Final Results -->
             <section class="results-section" id="resultsSection" style="display: none;">
@@ -217,6 +241,10 @@
                         <i class="fas fa-check-circle"></i>
                         Final Results
                     </h3>
+                    <div class="info-box" style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                        <i class="fas fa-info-circle" style="color: #2196F3; margin-right: 10px;"></i>
+                        <span><strong>Note:</strong> Downloaded files will be saved to your Downloads folder (usually C:\Users\YourUsername\Downloads on Windows or ~/Downloads on Mac/Linux)</span>
+                    </div>
                     <div class="results-grid">
                         <div class="result-card">
                             <h4>Original Data</h4>
@@ -225,10 +253,20 @@
                         <div class="result-card">
                             <h4>Encrypted Data</h4>
                             <div class="result-content" id="encryptedResult"></div>
+                            <button id="downloadEncryptedBtn" class="btn-download">
+                                <i class="fas fa-download"></i>
+                                Download Encrypted File (.cryptex)
+                            </button>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder</p>
                         </div>
                         <div class="result-card">
                             <h4>Decrypted Data</h4>
                             <div class="result-content" id="decryptedResult"></div>
+                            <button id="downloadDecryptedBtn" class="btn-download">
+                                <i class="fas fa-download"></i>
+                                Download Decrypted File (.txt)
+                            </button>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder</p>
                         </div>
                         <div class="result-card">
                             <h4>Verification</h4>
@@ -252,6 +290,7 @@
         </div>
     </div>
 
+    <script src="crypto_improved.js"></script>
     <script src="visualizer_script.js"></script>
 </body>
 </html>

@@ -299,6 +299,11 @@ body {
     background: #eff6ff;
 }
 
+.activity-item.security_scan {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
 .no-activity {
     text-align: center;
     color: #666;
@@ -413,6 +418,11 @@ body {
 .action-badge.decryption {
     background: #f3e5f5;
     color: #7b1fa2;
+}
+
+.action-badge.security_scan {
+    background: #fdf2f8;
+    color: #be185d;
 }
 
 /* Analytics Section */
