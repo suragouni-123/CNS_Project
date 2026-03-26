@@ -507,7 +507,7 @@ function clearFiles() {
     hideResults();
     
     // Reset message when files are cleared
-    updateMessage('Ready to secure your files with military-grade encryption. Select files and enter a password to begin.', 'info');
+    updateMessage('Ready to secure your files. Select files and enter a password to begin.', 'info');
     
     // Update shared state
     localStorage.removeItem('sharedFiles');
