@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="visualizer_style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -241,9 +243,11 @@
                         <i class="fas fa-check-circle"></i>
                         Final Results
                     </h3>
-                    <div class="info-box" style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                    <div class="info-box"
+                        style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
                         <i class="fas fa-info-circle" style="color: #2196F3; margin-right: 10px;"></i>
-                        <span><strong>Note:</strong> Downloaded files will be saved to your Downloads folder (usually C:\Users\YourUsername\Downloads on Windows or ~/Downloads on Mac/Linux)</span>
+                        <span><strong>Note:</strong> Downloaded files will be saved to your Downloads folder (usually
+                            C:\Users\YourUsername\Downloads on Windows or ~/Downloads on Mac/Linux)</span>
                     </div>
                     <div class="results-grid">
                         <div class="result-card">
@@ -257,7 +261,8 @@
                                 <i class="fas fa-download"></i>
                                 Download Encrypted File (.cryptex)
                             </button>
-                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder</p>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder
+                            </p>
                         </div>
                         <div class="result-card">
                             <h4>Decrypted Data</h4>
@@ -266,7 +271,8 @@
                                 <i class="fas fa-download"></i>
                                 Download Decrypted File (.txt)
                             </button>
-                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder</p>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">→ Check your Downloads folder
+                            </p>
                         </div>
                         <div class="result-card">
                             <h4>Verification</h4>
@@ -277,20 +283,21 @@
             </section>
         </main>
 
-        <footer class="footer">
-            <p>&copy; 2024 AES Process Visualizer | Educational Encryption Tool</p>
-        </footer>
-    </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <div class="toast-content">
-            <i class="fas fa-info-circle"></i>
-            <span id="toastMessage"></span>
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <div class="toast-content">
+                <i class="fas fa-info-circle"></i>
+                <span id="toastMessage"></span>
+            </div>
         </div>
-    </div>
 
-    <script src="crypto_improved.js"></script>
-    <script src="visualizer_script.js"></script>
+        <footer class="footer">
+            <p>AES Encryption System | SECURE DATA</p>
+        </footer>
+
+        <script src="crypto_improved.js"></script>
+        <script src="visualizer_script.js"></script>
 </body>
+
 </html>
